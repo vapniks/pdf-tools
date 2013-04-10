@@ -6,7 +6,7 @@
 ** GNU/Linux OS
 ** convert
    http://www.imagemagick.org
-** Emacs
+** Emacs >= 24
    Preferably with imagemagick support.
 ** poppler-glib
    Any version will do, but some will do better.

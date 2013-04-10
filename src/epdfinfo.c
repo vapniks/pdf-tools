@@ -29,6 +29,12 @@
 #include <sys/types.h>
 #include "epdfinfo.h"
 
+/* Steps to add new commands
+   1. Define a args_spec_t array.
+   2. Add it to the array cmds.
+   3. Implement the command.
+*/
+
 
 /* declarations */
 static arg_t *parse_args(const ctxt_t *ctx, const char *args, size_t len,
@@ -164,6 +170,8 @@ void err_handler (const gchar *err)
   /* FIXME: Handle glib errors. */
 }
 
+
+/* core functions */
 int main(int argc, char **argv)
 {
   ctxt_t ctx;

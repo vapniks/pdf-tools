@@ -38,9 +38,16 @@
   "A hook ran after turning the page.")
 
 ;;
-;; Doc View Buffers
+;; Doc View 
 ;; 
 
+(defun pdf-util-docview-buffer-p (&optional buffer)
+  (and (or (null buffer)
+           (buffer-live-p buffer))
+       (save-current-buffer
+         (and buffer (set-buffer buffer))
+         (derived-mode-p 'doc-view-mode))))
+  
 (defun pdf-util-pdf-buffer-p (&optional buffer)
   (and (or (null buffer)
            (buffer-live-p buffer))
@@ -49,6 +56,10 @@
          (and (derived-mode-p 'doc-view-mode)
               (eq 'pdf doc-view-doc-type)))))
 
+(defun pdf-util-assert-docview-buffer ()
+  (unless (pdf-util-docview-buffer-p)
+    (error "Buffer is not in doc-view mode")))
+
 (defun pdf-util-assert-pdf-buffer ()
   (unless (pdf-util-pdf-buffer-p)
     (error "Buffer is not in doc-view PDF mode")))
@@ -56,6 +67,34 @@
 (defadvice doc-view-goto-page (after pdf-util activate)
   "Run `pdf-util-after-change-page-hook'."
   (run-hooks 'pdf-util-after-change-page-hook))
+
+(defun pdf-util-docview-image-files-lessp (f1 f2)
+  (let* ((f1 (file-name-nondirectory f1))
+         (f2 (file-name-nondirectory f2))
+         (re "page-\\([0-9]+\\)\\.png")
+         (p1 (and (string-match re f1)
+                  (string-to-number (match-string 1 f1))))
+         (p2 (and (string-match re f2)
+                  (string-to-number (match-string 1 f2)))))
+    (cond
+     ((and p1 p2)
+      (< p1 p2))
+     ((and (not p1) (not p2))
+      (string-lessp p1 p2))
+     ((not p2)))))      
+    
+  
+(defun pdf-util-docview-image-files (&optional buffer no-sort)
+  (let ((image-files (directory-files
+                      (buffer-local-value
+                       'doc-view-current-cache-dir
+                       (or buffer (current-buffer)))
+                      t "page-[0-9]+.png\\'" t)))
+    (if no-sort
+        image-files
+      (sort image-files 'pdf-util-docview-image-files-lessp))))
+    
+    
   
 ;;
 ;; Handling Edges
